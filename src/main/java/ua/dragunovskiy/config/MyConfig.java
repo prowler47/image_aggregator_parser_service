@@ -5,13 +5,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ua.dragunovskiy.FilterParserChain;
 import ua.dragunovskiy.ParserChain;
-import ua.dragunovskiy.parser.ImageParser;
 import ua.dragunovskiy.parser.Parser;
 
 @Configuration
 public class MyConfig {
     @Autowired
-    public ImageParser parser;
+    public Parser parser;
 
     @Bean
     public FilterParserChain configure(ParserChain parserChain) {

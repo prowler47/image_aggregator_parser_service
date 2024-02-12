@@ -1,5 +1,6 @@
 package ua.dragunovskiy.parser;
 
+import lombok.Getter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -7,15 +8,17 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @Component
-public class ImageParser implements Parser {
-
+@Getter
+public class ImageParserToFile implements Parser {
+    public int imageCount = 0;
     @Override
-    public void parseURLs(String url, String key) {
+    public List<String> parse(String url, String key) {
         List<String> imagesURLs = new ArrayList<>();
         Document document;
         try {
@@ -46,9 +49,9 @@ public class ImageParser implements Parser {
         List<String> urls = imagesURLs.stream()
                 .filter(image -> image.contains(key))
                 .toList();
-
-        downloadImagesToFile(urls);
-//        return imagesURLs;
+        imageCount = downloadImagesToFile(urls, key);
+        System.out.println(imageCount);
+        return urls;
     }
 
     public List<byte[]> downloadImagesToList(List<String> imageURLs) {
@@ -77,8 +80,9 @@ public class ImageParser implements Parser {
         return imageDataList;
     }
 
-    private void downloadImagesToFile(List<String> imageURLs) {
+    private int downloadImagesToFile(List<String> imageURLs, String key) {
         String suffix = "";
+        int imageCount = 0;
         for (String imageURL : imageURLs) {
             try {
                 URL url = new URL(imageURL);
@@ -101,7 +105,11 @@ public class ImageParser implements Parser {
                 if (imageURL.endsWith(".gif")) {
                     suffix = ".gif";
                 }
-                File file = File.createTempFile(imageURL, suffix, new File("/Users/mac/Documents/tmp/"));
+                Path path = Paths.get("/Users/mac/Documents/tmp/" + key);
+                Files.createDirectories(path);
+
+                File file = File.createTempFile(imageURL, suffix, new File(path.toString()));
+                imageCount++;
                 FileOutputStream fileOutputStream = new FileOutputStream(file);
                 fileOutputStream.write(buffer.toByteArray());
                 fileOutputStream.close();
@@ -110,6 +118,7 @@ public class ImageParser implements Parser {
                 System.err.println("Error: " + e.getMessage());
             }
         }
+        return imageCount;
     }
 
     private List<String> parseImageUrlsFromImg(Document document, String format) {
