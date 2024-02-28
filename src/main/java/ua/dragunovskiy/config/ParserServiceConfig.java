@@ -24,7 +24,7 @@ public class ParserServiceConfig {
     public SettingParserChain configure(ParserChain parserChain) {
         parserChain
                 .setParser(parser)
-                .setUrl("https://ru.freepik.com");
+                .setUrl("https://www.freepik.com");
         return parserChain.build();
     }
 }
