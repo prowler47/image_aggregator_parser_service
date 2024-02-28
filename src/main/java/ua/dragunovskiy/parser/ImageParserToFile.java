@@ -16,16 +16,20 @@ import java.util.List;
 @Component
 @Getter
 public class ImageParserToFile implements Parser {
-    public int imageCount = 0;
+
+    // This method parse urls for images by target site url it
+    // can do it with some key, which can include in name of
+    // image urls and with empty key. Parser can parse urls in
+    // format png, jpg and gif
     @Override
     public List<String> parse(String url, String key) {
         List<String> imagesURLs = new ArrayList<>();
         Document document;
         try {
             document = Jsoup.connect(url).get();
-            List<String> imagesUrlsForPngFromA = parseImageUrlsFromA(document, ".png", url);
-            List<String> imagesUrlsForJpgFromA = parseImageUrlsFromA(document, ".jpg", url);
-            List<String> imagesUrlsForGifFromA = parseImageUrlsFromA(document, ".gif", url);
+            List<String> imagesUrlsForPngFromA = parseImageUrlsFromA(document, ".png");
+            List<String> imagesUrlsForJpgFromA = parseImageUrlsFromA(document, ".jpg");
+            List<String> imagesUrlsForGifFromA = parseImageUrlsFromA(document, ".gif");
 
             List<String> imagesUrlsForPngFromImg = parseImageUrlsFromImg(document, ".png");
             List<String> imagesUrlsForGifFromImg = parseImageUrlsFromImg(document, ".gif");
@@ -46,81 +50,12 @@ public class ImageParserToFile implements Parser {
         for (String imgURL : imagesURLs) {
             System.out.println(imgURL);
         }
-        List<String> urls = imagesURLs.stream()
+        return imagesURLs.stream()
                 .filter(image -> image.contains(key))
                 .toList();
-        imageCount = downloadImagesToFile(urls, key);
-        System.out.println(imageCount);
-        return urls;
     }
 
-    public List<byte[]> downloadImagesToList(List<String> imageURLs) {
-        List<byte[]> imageDataList = new ArrayList<>();
-        for (String imageURL : imageURLs) {
-            try {
-                URL url = new URL(imageURL);
-                InputStream inputStream = url.openStream();
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                int read;
-                byte[] data = new byte[1024 * 1024];
-                while ((read = inputStream.read(data, 0, data.length)) != -1) {
-                    buffer.write(data, 0, read);
-                }
-                inputStream.close();
-                buffer.flush();
-
-                imageDataList.add(buffer.toByteArray());
-            } catch (IOException e) {
-                System.err.println("Error: " + e.getMessage());
-            }
-        }
-        for (byte[] data : imageDataList) {
-            System.out.println(Arrays.toString(data));
-        }
-        return imageDataList;
-    }
-
-    private int downloadImagesToFile(List<String> imageURLs, String key) {
-        String suffix = "";
-        int imageCount = 0;
-        for (String imageURL : imageURLs) {
-            try {
-                URL url = new URL(imageURL);
-                InputStream inputStream = url.openStream();
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                int read;
-                byte[] data = new byte[5 * 1024 * 1024];
-                while ((read = inputStream.read(data, 0, data.length)) != -1) {
-                    buffer.write(data, 0, read);
-                }
-                inputStream.close();
-                buffer.flush();
-
-                if (imageURL.endsWith(".png")) {
-                    suffix = ".png";
-                }
-                if (imageURL.endsWith(".jpg")) {
-                    suffix = ".jpg";
-                }
-                if (imageURL.endsWith(".gif")) {
-                    suffix = ".gif";
-                }
-                Path path = Paths.get("/Users/mac/Documents/tmp/" + key);
-                Files.createDirectories(path);
-
-                File file = File.createTempFile(imageURL, suffix, new File(path.toString()));
-                imageCount++;
-                FileOutputStream fileOutputStream = new FileOutputStream(file);
-                fileOutputStream.write(buffer.toByteArray());
-                fileOutputStream.close();
-
-            } catch (IOException e) {
-                System.err.println("Error: " + e.getMessage());
-            }
-        }
-        return imageCount;
-    }
-
+    // This is auxiliary method for parsing urls from <img> attribute
     private List<String> parseImageUrlsFromImg(Document document, String format) {
         List<String> imageURLsForImg;
         Elements imagesForImg = document.select("img");
@@ -128,14 +63,11 @@ public class ImageParserToFile implements Parser {
                 .map(image -> image.attr("abs:src"))
                 .filter(image -> image.endsWith(format))
                 .toList();
-//        for (String imageURL : imageURLsForImg) {
-//            System.out.println(imageURL);
-//        }
         return imageURLsForImg;
     }
 
-     //without domain name
-    private List<String> parseImageUrlsFromA(Document document, String format, String URL) {
+    // This is auxiliary method for parsing urls from <a> attribute
+    private List<String> parseImageUrlsFromA(Document document, String format) {
         List<String> imagesUrlsForJpg;
         Elements imagesFomA = document.select("a");
         imagesUrlsForJpg = imagesFomA.stream()
@@ -146,20 +78,4 @@ public class ImageParserToFile implements Parser {
                 .toList();
         return imagesUrlsForJpg;
     }
-
-    // with domain name
-//        private List<String> parseImageUrlsFromA(Document document, String format, String URL) {
-//        List<String> imagesUrlsForJpg;
-//        String shortUrl = URL.substring(8, URL.length() - 1);
-//        int indexLast = shortUrl.indexOf("/");
-//        String domainName = shortUrl.substring(0, indexLast);
-//        Elements imagesFomA = document.select("a");
-//        imagesUrlsForJpg = imagesFomA.stream()
-//                .map(image -> image.attr("href"))
-//                .map(image -> "https://" + domainName + image)
-//                .filter(image -> image.endsWith(format))
-//                .distinct()
-//                .toList();
-//        return imagesUrlsForJpg;
-//    }
 }
