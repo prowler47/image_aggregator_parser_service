@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import ua.dragunovskiy.chain.SettingParserChain;
 import ua.dragunovskiy.chain.ParserChain;
 import ua.dragunovskiy.parser.Parser;
+import ua.dragunovskiy.service.RabbitMQService;
 
 
 // This is configuration class for more flexible settings. It can
@@ -23,8 +24,7 @@ public class ParserServiceConfig {
     @Bean
     public SettingParserChain configure(ParserChain parserChain) {
         parserChain
-                .setParser(parser)
-                .setUrl("https://www.freepik.com");
+                .setParser(parser);
         return parserChain.build();
     }
 }

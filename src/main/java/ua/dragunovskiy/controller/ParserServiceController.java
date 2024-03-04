@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.dragunovskiy.chain.SettingParserChain;
 import ua.dragunovskiy.parser.Parser;
+import ua.dragunovskiy.service.RabbitMQService;
 
 import java.util.List;
 
@@ -21,11 +22,14 @@ public class ParserServiceController {
     @Autowired
     private SettingParserChain settingParserChain;
 
+    @Autowired
+    private RabbitMQService rabbitMQService;
+
     // This method send list of urls to RabbitMQ queue
     @GetMapping("/send_list")
     public String testRabbitMqWithList() {
         Parser parser = settingParserChain.parserChain.getParserList().get(0);
-        List<String> urls = parser.parse(settingParserChain.parserChain.getURL(), "");
+        List<String> urls = parser.parse(rabbitMQService.getSiteUrl(), "");
         for (String URL : urls) {
             rabbitTemplate.convertAndSend("Test-exchange", "Test", URL);
         }
