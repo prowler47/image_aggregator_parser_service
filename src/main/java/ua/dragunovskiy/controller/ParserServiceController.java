@@ -30,7 +30,7 @@ public class ParserServiceController {
     @GetMapping("/send_list")
     public String testRabbitMqWithList() {
         Parser parser = settingParserChain.parserChain.getParserList().get(0);
-        List<String> urls = parser.parse(rabbitMQService.getSiteUrl(), "");
+        List<String> urls = parser.parse(rabbitMQService.getSiteUrl(), rabbitMQService.getKey());
         for (String URL : urls) {
             rabbitTemplate.convertAndSend("Test-exchange", "Test", URL);
         }

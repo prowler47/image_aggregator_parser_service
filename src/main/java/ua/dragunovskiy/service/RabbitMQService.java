@@ -10,9 +10,16 @@ public class RabbitMQService {
 
     private String siteUrl;
 
+    private String key;
+
     @RabbitListener(queues = "Site_url")
     public void getSiteUrl(String message) {
         siteUrl = message;
         System.out.println(message);
+    }
+
+    @RabbitListener(queues = "key_parser")
+    public void getKey(String message) {
+        key = message;
     }
 }
