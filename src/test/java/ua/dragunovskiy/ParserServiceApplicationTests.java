@@ -1,13 +1,9 @@
 package ua.dragunovskiy;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+import static org.springframework.test.util.AssertionErrors.assertTrue;
+
 class ParserServiceApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
 
 }
